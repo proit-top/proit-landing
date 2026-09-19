@@ -41,6 +41,9 @@ yarn-debug.log*
 .tmp/
 tmp/
 
+# Deployment tool state
+.netlify/
+
 # Hermes/internal planning data
 .hermes/
 plans/
