@@ -11,7 +11,7 @@
 ## Целевая инфраструктура
 
 - Hosting: Netlify
-- Repository: GitHub, отдельный репозиторий для сайта; URL ещё не зафиксирован.
+- Repository: `git@github.com:proit-top/proit-landing.git`.
 - Branch: `main`
 - Предварительный стек: Astro + React island + Three.js/React Three Fiber + GSAP, если это подтвердится архитектурой.
 
