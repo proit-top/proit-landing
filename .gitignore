@@ -44,6 +44,10 @@ tmp/
 # Deployment tool state
 .netlify/
 
+# Internal handoff and planning files
+/WEBSITE-BRIEF.md
+/HANDOFF-WEBSITE-BUILDER.md
+
 # Hermes/internal planning data
 .hermes/
 plans/
