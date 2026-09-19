@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+
+# Builds and caches
+dist/
+.output/
+.astro/
+.cache/
+.vite/
+coverage/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Certificates, keys and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+id_ed25519*
+.ssh/
+
+# Local tooling and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+.tmp/
+tmp/
+
+# Hermes/internal planning data
+.hermes/
+plans/
+notes/
+internal/
+
+# Generated/private content
+uploads/
+private/
+secrets/
