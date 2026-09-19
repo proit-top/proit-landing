@@ -47,6 +47,9 @@ tmp/
 # Internal handoff and planning files
 /WEBSITE-BRIEF.md
 /HANDOFF-WEBSITE-BUILDER.md
+/ASTRA-PROMPT.md
+/reports/
+/test-results/
 
 # Hermes/internal planning data
 .hermes/

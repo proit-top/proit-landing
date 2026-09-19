@@ -1,0 +1,31 @@
+---
+const endpoint = import.meta.env.PUBLIC_CONTACT_ENDPOINT || '';
+---
+<form method="post" class="contact-form" data-contact-form data-endpoint={endpoint}>
+  <div class="form-row"><label for="name">Ваше имя<input id="name" name="name" required autocomplete="name" maxlength="100" placeholder="Как к вам обращаться" /></label><label for="contact-field">Как с вами связаться<input id="contact-field" name="contact" required autocomplete="email" maxlength="200" placeholder="Email или телефон" /></label></div>
+  <label for="task">Что нужно решить<textarea id="task" name="message" rows="4" required minlength="10" maxlength="4000" placeholder="Кратко опишите задачу"></textarea></label>
+  <label class="consent" for="consent"><input id="consent" name="consent" type="checkbox" required /><span>Согласен на обработку данных из обращения согласно <a href="/privacy/">политике конфиденциальности</a>.</span></label>
+  <p class="form-status" role="status" aria-live="polite" data-status>{!endpoint && 'Отправка заявок пока недоступна. Данные не будут отправлены.'}</p>
+  <button type="submit" class="button" disabled>Обсудить задачу <span aria-hidden="true">↗</span></button>
+  <noscript><p>Для отправки формы требуется JavaScript.</p></noscript>
+</form>
+<script>
+  import { postJSON, friendlyError } from '../lib/transport';
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  if (form?.dataset.endpoint) form.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled = false;
+  form?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    if (button.disabled || !form.reportValidity()) return;
+    const data = new FormData(form);
+    if (!String(data.get('name')).trim() || !String(data.get('contact')).trim() || String(data.get('message')).trim().length < 10) { status.textContent = 'Заполните имя, контакт и описание задачи (не менее 10 символов).'; form.dataset.state = 'error'; return; }
+    button.disabled = true; form.dataset.state = 'loading'; form.setAttribute('aria-busy', 'true'); status.textContent = 'Отправляем обращение…';
+    try {
+      const response = await postJSON(form.dataset.endpoint || '', { name: String(data.get('name')).trim(), contact: String(data.get('contact')).trim(), message: String(data.get('message')).trim(), consent: true, privacyVersion: 'draft-1' });
+      if (response.ok !== true) throw new Error('invalid');
+      form.dataset.state = 'success'; status.textContent = 'Обращение принято. Спасибо, что описали задачу.'; form.reset();
+    } catch (error) { form.dataset.state = 'error'; status.textContent = friendlyError(error); }
+    finally { button.disabled = !form.dataset.endpoint; form.removeAttribute('aria-busy'); }
+  });
+</script>

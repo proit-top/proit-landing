@@ -1,0 +1,46 @@
+---
+const endpoint = import.meta.env.PUBLIC_CHAT_ENDPOINT || '';
+---
+<button class="chat-launcher" type="button" data-open-chat aria-haspopup="dialog" aria-controls="proit-chat"><span class="chat-glyph" aria-hidden="true">↗</span> Чат с PROIT</button>
+<dialog id="proit-chat" class="chat" aria-labelledby="chat-title" data-endpoint={endpoint}>
+  <div class="chat-header"><div><h2 id="chat-title">PROIT <span>/ чат</span></h2><p>Начнём с вашей задачи</p></div><button class="close-chat" type="button" aria-label="Закрыть чат">×</button></div>
+  <div class="chat-history" role="log" aria-label="Сообщения" aria-live="polite"><p class="chat-intro">Опишите ситуацию своими словами. Не отправляйте пароли, ключи доступа или конфиденциальные документы.</p></div>
+  <form method="post" class="chat-form"><label for="chat-message">Ваше сообщение<textarea id="chat-message" required maxlength="2000" rows="3" placeholder="Чем можем помочь?"></textarea></label><label class="consent"><input name="chat-consent" type="checkbox" required /><span>Согласен с <a href="/privacy/">политикой конфиденциальности</a>.</span></label><p class="form-status" role="status" data-chat-status>{!endpoint && 'Чат пока не подключён. Сообщения не отправляются.'}</p><button class="button" type="submit" disabled>Отправить <span aria-hidden="true">↗</span></button></form>
+</dialog>
+<script>
+  import { postJSON, friendlyError } from '../lib/transport';
+  const dialog = document.querySelector<HTMLDialogElement>('#proit-chat')!;
+  let opener: HTMLElement | null = null;
+  document.querySelectorAll<HTMLElement>('[data-open-chat]').forEach(button => button.addEventListener('click', () => { opener = button; dialog.showModal(); document.body.classList.add('modal-open'); }));
+  dialog.querySelector('.close-chat')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => { document.body.classList.remove('modal-open'); opener?.focus(); });
+  dialog.addEventListener('click', event => { if (event.target === dialog) { const rect = dialog.getBoundingClientRect(); if(event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close(); } });
+  dialog.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const controls = Array.from(dialog.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), [tabindex="0"]')).filter(element => element.getClientRects().length > 0);
+    const first = controls[0]; const last = controls[controls.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+  });
+  const form = dialog.querySelector<HTMLFormElement>('form')!;
+  const input = dialog.querySelector<HTMLTextAreaElement>('textarea')!;
+  const status = dialog.querySelector<HTMLElement>('[data-chat-status]')!;
+  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  button.disabled = !dialog.dataset.endpoint;
+  const history = dialog.querySelector<HTMLElement>('.chat-history')!;
+  let conversationId: string | undefined;
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const message = input.value.trim();
+    if (button.disabled || !form.reportValidity() || !message) return;
+    button.disabled = true; input.readOnly = true; form.setAttribute('aria-busy', 'true'); dialog.dataset.state = 'loading'; status.textContent = 'Отправляем сообщение…';
+    try {
+      const response = await postJSON(dialog.dataset.endpoint || '', { message, conversationId, consent: true, privacyVersion: 'draft-1' });
+      if (response.ok !== true || typeof response.reply !== 'string' || !response.reply.trim()) throw new Error('invalid');
+      if (typeof response.conversationId === 'string') conversationId = response.conversationId;
+      for (const [author, text] of [['Вы', message], ['PROIT', response.reply]]) { const p = document.createElement('p'); p.className = author === 'Вы' ? 'message yours' : 'message'; const strong = document.createElement('strong'); strong.textContent = author; p.append(strong, document.createTextNode(text)); history.append(p); }
+      input.value = ''; status.textContent = 'Ответ получен.'; dialog.dataset.state = 'success'; history.scrollTop = history.scrollHeight;
+    } catch (error) { dialog.dataset.state = 'error'; status.textContent = friendlyError(error); }
+    finally { button.disabled = !dialog.dataset.endpoint; input.readOnly = false; form.removeAttribute('aria-busy'); if (dialog.open) input.focus(); }
+  });
+</script>

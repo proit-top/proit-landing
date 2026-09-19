@@ -1,0 +1,57 @@
+---
+import '../styles/global.css';
+import Chat from '../components/Chat.astro';
+interface Props { title?: string; description?: string; noindex?: boolean }
+const { title = 'PROIT | IT, на которое можно опереться', description = 'IT-поддержка, инфраструктура и AI-автоматизация для бизнеса. Помогаем разобраться в сложных IT-вопросах и определить понятный следующий шаг.', noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111614" />
+  <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex, follow" />}
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="PROIT" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content="https://proit.top/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="PROIT. IT, на которое можно опереться." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>{title}</title>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к содержанию</a>
+  <header class="header wrap">
+    <a href="/" class="logo" aria-label="PROIT, главная">PRO<span>IT</span><i aria-hidden="true"></i></a>
+    <nav class="desktop-nav" aria-label="Основная навигация">
+      <a href="/#services">Услуги</a><a href="/#ai">AI-автоматизация</a><a href="/#process">Как работаем</a><a href="/#about">О компании</a><a href="/contacts/">Контакты</a>
+    </nav>
+    <a href="/#contact" class="button small header-cta">Обсудить задачу <span aria-hidden="true">↗</span></a>
+    <details class="mobile-menu">
+      <summary>Меню <span aria-hidden="true">＋</span></summary>
+      <nav aria-label="Мобильная навигация"><a href="/#services">Услуги</a><a href="/#ai">AI-автоматизация</a><a href="/#process">Как работаем</a><a href="/#about">О компании</a><a href="/contacts/">Контакты</a><a href="/#contact">Обсудить задачу</a></nav>
+    </details>
+  </header>
+  <main id="main" tabindex="-1"><slot /></main>
+  <footer class="wrap footer">
+    <div class="footer-brand"><a href="/" class="logo" aria-label="PROIT, главная">PRO<span>IT</span><i aria-hidden="true"></i></a><p>Поддержка сегодня.<br />Основа для развития завтра.</p></div>
+    <div class="footer-links"><a href="/contacts/">Контакты</a><a href="/support/">Поддержка</a><a href="/privacy/">Конфиденциальность</a><a href="/terms/">Условия использования</a></div>
+    <div class="footer-bottom"><span>PROIT © {new Date().getFullYear()}</span><span>IT-поддержка и AI-автоматизация</span></div>
+  </footer>
+  <Chat />
+  <script>
+    const menu = document.querySelector<HTMLDetailsElement>('.mobile-menu');
+    menu?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { menu.open = false; }));
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && menu?.open) { menu.open = false; menu.querySelector('summary')?.focus(); } });
+  </script>
+</body>
+</html>
