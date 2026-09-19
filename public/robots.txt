@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://proit.top/sitemap-index.xml
